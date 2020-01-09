@@ -34,6 +34,9 @@ class DataLoader:
             orders["cdate"] = pd.to_datetime(orders["cdate"], errors='coerce', unit='s')
             order_items = pd.read_csv(self.data["second"])
             order_items["order_item_sku"] = order_items["order_item_sku"].astype(str)
-            return orders.merge(order_items, on="order_id", how="left")
+            user_type = pd.read_csv(self.data["third"])
+            user_type["shopper_group_id"] = user_type["shopper_group_id"].apply(lambda x: x != 5)
+            user_type.rename(columns={"shopper_group_id": "is_corp"}, inplace=True)
+            return orders.merge(order_items, on="order_id", how="left").merge(user_type, on="user_id",how="inner")
         else:
             raise Exception("Unknown type of data source")
